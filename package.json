@@ -12,13 +12,11 @@
   "license": "ISC",
   "devDependencies": {
     "@microsoft/microsoft-graph-types": "^2.13.0",
-    "@types/compression": "^1.7.2",
     "@types/debug": "^4.1.7",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
     "@types/isomorphic-fetch": "^0.0.35",
     "@types/jwt-decode": "^3.1.0",
-    "@types/morgan": "^1.9.3",
     "@types/node": "^17.0.17",
     "ts-node": "^10.5.0",
     "ts-node-dev": "^1.1.8",
@@ -28,13 +26,11 @@
     "@microsoft/microsoft-graph-client": "^3.0.2",
     "botbuilder": "^4.15.0",
     "botbuilder-dialogs": "^4.15.0",
-    "compression": "^1.7.4",
     "debug": "^4.3.3",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "express-msteams-host": "^1.9.0",
     "isomorphic-fetch": "^3.0.0",
-    "jwt-decode": "^3.1.2",
-    "morgan": "^1.10.0"
+    "jwt-decode": "^3.1.2"
   }
 }
