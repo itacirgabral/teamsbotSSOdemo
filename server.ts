@@ -26,17 +26,13 @@ express.use(Express.urlencoded({ extended: true }));
 express.use(function (req, res, next) {
   console.log("#######")
   console.log("# SPY #")
-  console.log("#######")
   console.log(JSON.stringify(req.body, null, 2))
+  console.log("# SPY #")
+  console.log("#######")
   next()
 })
 
 express.use(MsTeamsApiRouter(allComponents));
-
-express.use(MsTeamsPageRouter({
-  root: path.join(__dirname, "web/"),
-  components: allComponents
-}));
 
 express.set("port", port);
 

@@ -25,19 +25,25 @@ export class MainDialog extends LogoutDialog {
 
     console.log("MainDialog constructor");
 
-    // sso signin prompt
-    this.addDialog(new SsoOauthPrompt(OAUTH_PROMPT_ID, {
+    const ssoOauthPrompt = new SsoOauthPrompt(OAUTH_PROMPT_ID, {
       connectionName: process.env.SSO_CONNECTION_NAME as string,
       text: "Please sign in",
       title: "Sign In",
       timeout: 300000
-    }));
+    })
 
-    // add waterfall dialogs
-    this.addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG_ID, [
+    console.log("###########################################################################################")
+    console.dir({ ssoOauthPrompt })
+    console.log(JSON.stringify(ssoOauthPrompt, null, 2))
+
+    this.addDialog(ssoOauthPrompt);
+
+    const waterfallDialog = new WaterfallDialog(MAIN_WATERFALL_DIALOG_ID, [
       this.promptStep.bind(this),
       this.displayMicrosoftGraphDataStep.bind(this)
-    ]));
+    ])
+    // console.log(JSON.stringify(waterfallDialog, null, 2))
+    this.addDialog(waterfallDialog);
 
     // set the initial dialog to the waterfall
     this.initialDialogId = MAIN_WATERFALL_DIALOG_ID;
@@ -49,13 +55,18 @@ export class MainDialog extends LogoutDialog {
     const dialogContext = await dialogSet.createContext(turnContext);
     const results = await dialogContext.continueDialog();
     if (results.status === DialogTurnStatus.empty) {
+      console.log('run 0')
       await dialogContext.beginDialog(this.id);
+      console.log('run f')
     }
   }
 
   public async promptStep(stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
     try {
-      return await stepContext.beginDialog(OAUTH_PROMPT_ID);
+      console.log('promptStep 0')
+      const dialog = await stepContext.beginDialog(OAUTH_PROMPT_ID);
+      console.log('promptStep f')
+      return dialog
     } catch (err) {
       console.error(err);
     }
@@ -69,14 +80,16 @@ export class MainDialog extends LogoutDialog {
     if (!tokenResponse?.token) {
       await stepContext.context.sendActivity("Login not successful, please try again.");
     } else {
+
+      console.dir(stepContext)
       const msGraphClient = new MsGraphHelper(tokenResponse?.token);
 
       const user = await msGraphClient.getCurrentUser();
       await stepContext.context.sendActivity(`Thank you for signing in ${user.displayName as string} (${user.userPrincipalName as string})!`);
       await stepContext.context.sendActivity("I can retrieve your details from Microsoft Graph using my support for SSO!");
 
-      // const email = await msGraphClient.getMostRecentEmail();
-      // await stepContext.context.sendActivity(`Your most recent email about "${email.subject as string}" was received at ${new Date(email.receivedDateTime as string).toLocaleString()}.`);
+      const email = await msGraphClient.getMostRecentEmail();
+      await stepContext.context.sendActivity(`Your most recent email about "${email.subject as string}" was received at ${new Date(email.receivedDateTime as string).toLocaleString()}.`);
     }
 
     return await stepContext.endDialog();

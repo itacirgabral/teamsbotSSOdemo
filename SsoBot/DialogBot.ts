@@ -19,7 +19,7 @@ export class DialogBot extends TeamsActivityHandler {
 
     this.onMessage(async (context, next) => {
       console.log("DialogBot onMessage");
-      // Run the Dialog with the new message Activity.
+
       await this.dialog.run(context, this.dialogState);
 
       await next();

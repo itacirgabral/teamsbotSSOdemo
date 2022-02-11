@@ -24,8 +24,7 @@ export class TokenExchangeInvokeResponse {
 
 export class SsoOauthPrompt extends OAuthPrompt {
   public async continueDialog(dialogContext: DialogContext): Promise<DialogTurnResult> {
-    // if token previously successfully exchanged, it should be cached in
-    //  TurnState along with the TokenExchangeInvokeRequest
+    console.log("SsoOauthPrompt")
     const cachedTokenResponse = dialogContext.context.turnState.get("tokenExchangeResponse");
 
     if (cachedTokenResponse) {
@@ -36,6 +35,9 @@ export class SsoOauthPrompt extends OAuthPrompt {
 
       // TokenExchangeInvokeResponse
       const exchangeResponse = new TokenExchangeInvokeResponse(tokenExchangeRequest.id, process.env.SSO_CONNECTION_NAME as string, tokenExchangeRequest.failureDetail);
+
+      console.log("exchangeResponse")
+      console.log(JSON.stringify(exchangeResponse, null, 2))
 
       await dialogContext.context.sendActivity({
         type: ActivityTypes.InvokeResponse,
@@ -53,6 +55,8 @@ export class SsoOauthPrompt extends OAuthPrompt {
       };
 
       return await dialogContext.endDialog(result);
+    } else {
+      console.log('no cachedTokenResponse')
     }
 
     return await super.continueDialog(dialogContext);

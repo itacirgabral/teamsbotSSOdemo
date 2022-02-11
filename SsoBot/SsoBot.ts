@@ -25,15 +25,19 @@ export class SsoBot extends DialogBot {
   public _ssoOAuthHelper: SsoOAuthHelper;
 
   constructor(conversationState: ConversationState, userState: UserState) {
-    super(conversationState, userState, new MainDialog());
-    this._ssoOAuthHelper = new SsoOAuthHelper();
-    // ssoOAuthHelper.shouldProcessTokenExchange
-    // ssoOAuthHelper.exchangeToken
-
     console.log("SsoBot constructor");
+
+    const mainDialog = new MainDialog()
+
+    console.log(JSON.stringify({ conversationState, userState, mainDialog }, null, 2))
+
+    super(conversationState, userState, mainDialog);
+
+    this._ssoOAuthHelper = new SsoOAuthHelper();
 
     this.onMembersAdded(async (context, next) => {
       console.log("onMembersAdded");
+
       const membersAdded = context.activity.membersAdded;
       if (membersAdded && membersAdded.length > 0) {
         for (let cnt = 0; cnt < membersAdded.length; cnt++) {
@@ -42,18 +46,23 @@ export class SsoBot extends DialogBot {
           }
         }
       }
+
       await next();
     });
 
     this.onTokenResponseEvent(async (context, next) => {
       console.log("SsoBot onTokenResponseEvent");
+
       await this.dialog.run(context, this.dialogState);
+
       await next();
     });
   }
+  // constructor <
 
   public async handleTeamsSigninTokenExchange(context: TurnContext, query: SigninStateVerificationQuery): Promise<void> {
     console.log("SsoBot handleTeamsSigninTokenExchange");
+
     if (!await this._ssoOAuthHelper.shouldProcessTokenExchange(context)) {
       await this.dialog.run(context, this.dialogState);
     }
@@ -61,6 +70,7 @@ export class SsoBot extends DialogBot {
 
   public async handleTeamsSigninVerifyState(context: TurnContext, query: SigninStateVerificationQuery): Promise<void> {
     console.log("SsoBot handleTeamsSigninVerifyState");
+
     await this.dialog.run(context, this.dialogState);
   }
 }
