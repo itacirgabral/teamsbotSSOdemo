@@ -32,6 +32,9 @@ const adapter = new CloudAdapter(botFrameworkAuthentication)
 adapter.onTurnError = (_context, error) => console.dir(error)
 
 let token
+let msGraphClient
+const microsoft = require('@microsoft/microsoft-graph-client')
+require('isomorphic-fetch')
 
 const TeamsConversationBot = class TeamsConversationBot extends TeamsActivityHandler {
   constructor() {
@@ -60,6 +63,15 @@ const TeamsConversationBot = class TeamsConversationBot extends TeamsActivityHan
           await context.sendActivity(MessageFactory.text('login'))
           }
           break;
+        case 'getme':
+          if (msGraphClient) {
+            const me = await msGraphClient.api("me").get()
+            console.dir({ me })
+            await context.sendActivity(MessageFactory.text('me'))
+          } else {
+            await context.sendActivity(MessageFactory.text('do login'))
+          }
+          break;
         default:
           await context.sendActivity(MessageFactory.text('what?'))
           break;
@@ -71,6 +83,13 @@ const TeamsConversationBot = class TeamsConversationBot extends TeamsActivityHan
     console.log('handleTeamsSigninTokenExchange')
     if (context?.activity?.name === tokenExchangeOperationName) {
       token = context?.activity?.value?.token
+
+      msGraphClient = microsoft.Client.init({
+        debugLogging: true,
+        authProvider: done => {
+          done(null, token)
+        }
+      })
     }
   }
 }
