@@ -88,8 +88,8 @@ export class MainDialog extends LogoutDialog {
       await stepContext.context.sendActivity(`Thank you for signing in ${user.displayName as string} (${user.userPrincipalName as string})!`);
       await stepContext.context.sendActivity("I can retrieve your details from Microsoft Graph using my support for SSO!");
 
-      const email = await msGraphClient.getMostRecentEmail();
-      await stepContext.context.sendActivity(`Your most recent email about "${email.subject as string}" was received at ${new Date(email.receivedDateTime as string).toLocaleString()}.`);
+      // const email = await msGraphClient.getMostRecentEmail();
+      // await stepContext.context.sendActivity(`Your most recent email about "${email.subject as string}" was received at ${new Date(email.receivedDateTime as string).toLocaleString()}.`);
     }
 
     return await stepContext.endDialog();

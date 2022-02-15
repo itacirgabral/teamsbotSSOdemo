@@ -28,9 +28,6 @@ export class SsoBot extends DialogBot {
     console.log("SsoBot constructor");
 
     const mainDialog = new MainDialog()
-
-    console.log(JSON.stringify({ conversationState, userState, mainDialog }, null, 2))
-
     super(conversationState, userState, mainDialog);
 
     this._ssoOAuthHelper = new SsoOAuthHelper();
