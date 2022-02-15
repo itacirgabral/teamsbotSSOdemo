@@ -2,25 +2,36 @@ require('dotenv').config({
   path: require('path').join(__dirname, '.env')
 })
 
+const SsoConnectionName = process.env.SSO_CONNECTION_NAME
+const MicrosoftAppId = process.env.MICROSOFT_APP_ID
+const MicrosoftAppPassword = process.env.MICROSOFT_APP_PASSWORD
+const MicrosoftAppType = process.env.MICROSOFT_APP_TYPE
+const MicrosoftAppTenantId = process.env.MICROSOFT_APP_TENANT_ID
+
 const restify = require('restify')
 
 const {
+  CardFactory,
   CloudAdapter,
   ConfigurationServiceClientCredentialFactory,
   createBotFrameworkAuthenticationFromConfiguration,
   TeamsActivityHandler,
+  tokenExchangeOperationName,
   MessageFactory
 } = require('botbuilder')
 
+
 const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
-  MicrosoftAppId: process.env.MICROSOFT_APP_ID,
-  MicrosoftAppPassword: process.env.MICROSOFT_APP_PASSWORD,
-  MicrosoftAppType: process.env.MICROSOFT_APP_TYPE,
-  MicrosoftAppTenantId: process.env.MICROSOFT_APP_TENANT_ID
+  MicrosoftAppId,
+  MicrosoftAppPassword,
+  MicrosoftAppType,
+  MicrosoftAppTenantId
 })
 const botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory)
 const adapter = new CloudAdapter(botFrameworkAuthentication)
 adapter.onTurnError = (_context, error) => console.dir(error)
+
+let token
 
 const TeamsConversationBot = class TeamsConversationBot extends TeamsActivityHandler {
   constructor() {
@@ -38,13 +49,29 @@ const TeamsConversationBot = class TeamsConversationBot extends TeamsActivityHan
       const text = context.activity?.text?.trim() ?? ''
       switch (text) {
         case 'login':
+          if (token) {
+            await context.sendActivity(MessageFactory.text(token))
+          } else {
+          const oauthCard = await CardFactory.oauthCard(SsoConnectionName, undefined, undefined, undefined, {
+            id: 'random65jHf9276hDy47',
+            uri: `api://botid-${MicrosoftAppId}`
+          })
+          await context.sendActivity(MessageFactory.attachment(oauthCard))
           await context.sendActivity(MessageFactory.text('login'))
+          }
           break;
         default:
           await context.sendActivity(MessageFactory.text('what?'))
           break;
       }
     })
+  }//
+
+  async handleTeamsSigninTokenExchange(context, query) {
+    console.log('handleTeamsSigninTokenExchange')
+    if (context?.activity?.name === tokenExchangeOperationName) {
+      token = context?.activity?.value?.token
+    }
   }
 }
 const bot = new TeamsConversationBot()
